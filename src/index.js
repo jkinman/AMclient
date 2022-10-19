@@ -4,6 +4,13 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// webgl lib imports TODO externalize
+// import * as THREE from './vendor/three/build/three.module.js';
+// THREE.PerspectiveCamera;
+// THREE.MeshStandardMaterial;
+// THREE.Texture;
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
