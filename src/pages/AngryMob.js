@@ -6,15 +6,25 @@ import {
   DepthOfField,
   Bloom,
   Noise,
-  Vignette
+  Vignette,
 } from "@react-three/postprocessing";
 import {
   Html,
   Icosahedron,
   useTexture,
   useCubeTexture,
-  MeshDistortMaterial
+  MeshDistortMaterial,
+  Plane,
+  Sphere,
+  Cylinder,
+  OrbitControls,
+  Environment
 } from "@react-three/drei";
+import { presetsObj } from "@react-three/drei/helpers/environment-assets";
+
+
+// custom
+import FxSW from "../components/grfx/fxSW"
 
 function MainSphere({ material }) {
   const main = useRef();
@@ -83,6 +93,15 @@ function Instances({ material }) {
   );
 }
 
+// const Lights = () => (
+
+//     return(
+//         <>
+//         </>
+//     )
+// )
+
+
 function Scene() {
   const bumpMap = useTexture("/bump.jpg");
   const envMap = useCubeTexture(
@@ -99,7 +118,7 @@ function Scene() {
         envMap={envMap}
         bumpMap={bumpMap}
         color={"#010101"}
-        roughness={0.1}
+        roughness={0.001}
         metalness={1}
         bumpScale={0.005}
         clearcoat={1}
@@ -112,11 +131,34 @@ function Scene() {
   );
 }
 
+function Box(props) {
+    // This reference gives us direct access to the THREE.Mesh object
+    const ref = useRef()
+    // Hold state for hovered and clicked events
+    const [hovered, hover] = useState(false)
+    const [clicked, click] = useState(false)
+    // Subscribe this component to the render-loop, rotate the mesh every frame
+    useFrame((state, delta) => (ref.current.rotation.x += 0.01))
+    // Return the view, these are regular Threejs elements expressed in JSX
+    return (
+      <mesh
+        {...props}
+        ref={ref}
+        scale={clicked ? 1.5 : 1}
+        onClick={(event) => click(!clicked)}
+        onPointerOver={(event) => hover(true)}
+        onPointerOut={(event) => hover(false)}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
+      </mesh>
+    )
+  }
+
 export default function App() {
   return (
     <Canvas
-    //   colorManagement
-      camera={{ position: [0, 0, 3] }}
+      colorManagement
+      camera={{ fov: 50, position: [0, 0, 20] }}
       gl={{
         powerPreference: "high-performance",
         alpha: false,
@@ -126,14 +168,26 @@ export default function App() {
       }}
     >
       <color attach="background" args={["#050505"]} />
-      <fog color="#161616" attach="fog" near={8} far={30} />
+      <fog color="#161616" attach="fog" near={8} far={60} />
       <Suspense fallback={<Html center>Loading.</Html>}>
         <Scene />
+        <pointLight position={[10, 10, 10]} />
+    <Box position={[1.2, 2, 0]} />
+            <Cylinder args={[50, 50, 50, 32]} >
+            <meshBasicMaterial color="green" side={THREE.DoubleSide}/>
+            </Cylinder>
+        {/* <Lights /> */}
+        <ambientLight intensity={0.1} />
       </Suspense>
-      <EffectComposer multisampling={0} disableNormalPass={true}>
+      <OrbitControls enableZoom={true} enablePan={false} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
+      <Environment preset={presetsObj.night} />
+      {/* https://github.com/pmndrs/drei/blob/master/src/helpers/environment-assets.ts */}
+
+        <FxSW />
+      {/* <EffectComposer multisampling={0} disableNormalPass={true}>
         <DepthOfField
           focusDistance={0}
-          focalLength={0.02}
+          focalLength={10}
           bokehScale={2}
           height={480}
         />
@@ -141,11 +195,11 @@ export default function App() {
           luminanceThreshold={0}
           luminanceSmoothing={0.9}
           height={300}
-          opacity={3}
+          opacity={0.3}
         />
-        <Noise opacity={0.025} />
-        <Vignette eskil={false} offset={0.1} darkness={1.1} />
-      </EffectComposer>
+        <Noise opacity={0.1} />
+        <Vignette eskil={false} offset={0.01} darkness={0.8} />
+      </EffectComposer> */}
     
     </Canvas>
   );
