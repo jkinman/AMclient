@@ -1,7 +1,7 @@
 import { EffectComposer, SSR, Bloom } from '@react-three/postprocessing'
 import { useControls, folder } from 'leva'
 
-export function Effects() {
+export function FxSW() {
   const props = useControls({
     enabled: true,
     intensity: { value: 1, min: 0, max: 5 },
@@ -45,3 +45,5 @@ export function Effects() {
     </EffectComposer>
   )
 }
+
+export default FxSW;

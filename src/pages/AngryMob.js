@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import React, { Suspense, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import {
   EffectComposer,
   DepthOfField,
@@ -18,13 +18,14 @@ import {
   Sphere,
   Cylinder,
   OrbitControls,
-  Environment
+  Environment,
+  useGLTF,
 } from "@react-three/drei";
 import { presetsObj } from "@react-three/drei/helpers/environment-assets";
-
-
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+// import * as BrassKnuckles from '../mesh/BrassKnuckles'
 // custom
-import FxSW from "../components/grfx/fxSW"
+import FxSW from "../components/grfx/FxSW"
 
 function MainSphere({ material }) {
   const main = useRef();
@@ -93,16 +94,10 @@ function Instances({ material }) {
   );
 }
 
-// const Lights = () => (
-
-//     return(
-//         <>
-//         </>
-//     )
-// )
-
-
 function Scene() {
+
+  const gltf = useLoader(GLTFLoader, '/brass_knuckles/scene.gltf')
+
   const bumpMap = useTexture("/bump.jpg");
   const envMap = useCubeTexture(
     ["px.png", "nx.png", "py.png", "ny.png", "pz.png", "nz.png"],
@@ -113,6 +108,7 @@ function Scene() {
 
   return (
     <>
+    <primitive object={gltf.scene} scale={[100,100,100]}/>
       <MeshDistortMaterial
         ref={set}
         envMap={envMap}
@@ -157,7 +153,7 @@ function Box(props) {
 export default function App() {
   return (
     <Canvas
-      colorManagement
+      // colorManagement
       camera={{ fov: 50, position: [0, 0, 20] }}
       gl={{
         powerPreference: "high-performance",
@@ -168,9 +164,10 @@ export default function App() {
       }}
     >
       <color attach="background" args={["#050505"]} />
-      <fog color="#161616" attach="fog" near={8} far={60} />
+      <fog color="#161616" attach="fog" near={8} far={100} />
       <Suspense fallback={<Html center>Loading.</Html>}>
         <Scene />
+
         <pointLight position={[10, 10, 10]} />
     <Box position={[1.2, 2, 0]} />
             <Cylinder args={[50, 50, 50, 32]} >
@@ -180,14 +177,14 @@ export default function App() {
         <ambientLight intensity={0.1} />
       </Suspense>
       <OrbitControls enableZoom={true} enablePan={false} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
-      <Environment preset={presetsObj.night} />
+      <Environment preset={'night'} />
       {/* https://github.com/pmndrs/drei/blob/master/src/helpers/environment-assets.ts */}
 
-        <FxSW />
-      {/* <EffectComposer multisampling={0} disableNormalPass={true}>
+        {/* <FxSW /> */}
+      <EffectComposer multisampling={0} disableNormalPass={true}>
         <DepthOfField
           focusDistance={0}
-          focalLength={10}
+          focalLength={3}
           bokehScale={2}
           height={480}
         />
@@ -199,7 +196,7 @@ export default function App() {
         />
         <Noise opacity={0.1} />
         <Vignette eskil={false} offset={0.01} darkness={0.8} />
-      </EffectComposer> */}
+      </EffectComposer>
     
     </Canvas>
   );
